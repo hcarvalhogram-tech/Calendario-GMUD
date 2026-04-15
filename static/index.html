@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GMUD - Calendário de Manutenção de Equipamentos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-image: url('./images/logo.png.png');
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            color: white;
+            padding: 100px 30px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(102, 126, 234, 0.3);
+            z-index: 1;
+        }
+
+        header > * {
+            position: relative;
+            z-index: 2;
+        }
+
+        .header-logo {
+            display: none;
+        }
+
+        .header-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        header h1 {
+            font-size: 3em;
+            margin-bottom: 5px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        header p {
+            font-size: 1.1em;
+            opacity: 1;
+            font-weight: 400;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 0;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            padding: 15px 30px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            color: #666;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab-btn:hover {
+            color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .dashboard-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card h3 {
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+
+        .stat-card .number {
+            font-size: 3em;
+            font-weight: bold;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        input[type="text"],
+        input[type="date"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        input[type="date"]:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-danger {
+            background: #d63031;
+        }
+
+        .btn-small {
+            padding: 8px 15px;
+            font-size: 0.9em;
+            margin-right: 5px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table thead {
+            background: #f5f5f5;
+        }
+
+        table th,
+        table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        table th {
+            font-weight: 700;
+            color: #333;
+        }
+
+        table tr:hover {
+            background: #f9f9f9;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .badge-agendado {
+            background: #ffeaa7;
+            color: #d63031;
+        }
+
+        .badge-em_progresso {
+            background: #74b9ff;
+            color: #0984e3;
+        }
+
+        .badge-concluido {
+            background: #55efc4;
+            color: #00b894;
+        }
+
+        .badge-cancelado {
+            background: #dfe6e9;
+            color: #636e72;
+        }
+
+        .badge-baixo {
+            background: #90ee90;
+            color: #27ae60;
+        }
+
+        .badge-médio {
+            background: #ffeaa7;
+            color: #d63031;
+        }
+
+        .badge-alto {
+            background: #ff7675;
+            color: #c0392b;
+        }
+
+        .calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .calendar-day-header {
+            font-weight: 700;
+            text-align: center;
+            padding: 10px;
+            color: #667eea;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .calendar-day:hover {
+            border-color: #667eea;
+            background: #f0f0ff;
+        }
+
+        .calendar-day.has-maintenance {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+
+        .calendar-day.other-month {
+            color: #ccc;
+            cursor: default;
+        }
+
+        .calendar-day.status-pendente {
+            background: #ffeaa7;
+            color: #d35400;
+            border-color: #d35400;
+            font-weight: 700;
+        }
+
+        .calendar-day.status-atrasado {
+            background: #ff7675;
+            color: white;
+            border-color: #c0392b;
+            font-weight: 700;
+            box-shadow: 0 0 10px rgba(192, 57, 43, 0.3);
+        }
+
+        .calendar-day.status-finalizado {
+            background: #55efc4;
+            color: #00b894;
+            border-color: #00b894;
+            font-weight: 700;
+        }
+
+        .calendar-day.status-progresso {
+            background: #74b9ff;
+            color: #0984e3;
+            border-color: #0984e3;
+            font-weight: 700;
+        }
+
+        .calendar-gmud-info {
+            font-size: 0.7em;
+            margin-top: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #e0e0e0;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.5s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #55efc4;
+            color: #00b894;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            display: none;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            display: block;
+            animation: slideIn 0.3s;
+        }
+
+        .toast.error {
+            background: #ff7675;
+            color: #c0392b;
+        }
+
+        /* Modal de Status */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.3s;
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s;
+        }
+
+        .modal-header {
+            padding: 25px 30px 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.3em;
+            color: #333;
+        }
+
+        .modal-body {
+            padding: 25px 30px;
+            display: grid;
+            gap: 12px;
+        }
+
+        .status-option {
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: left;
+            font-weight: 600;
+            font-size: 1em;
+            background: white;
+        }
+
+        .status-option:hover {
+            border-color: #667eea;
+            background: #f0f0ff;
+            transform: translateX(5px);
+        }
+
+        .status-option.agendado {
+            border-left: 4px solid #ffeaa7;
+            color: #d35400;
+        }
+
+        .status-option.em_progresso {
+            border-left: 4px solid #74b9ff;
+            color: #0984e3;
+        }
+
+        .status-option.concluido {
+            border-left: 4px solid #55efc4;
+            color: #00b894;
+        }
+
+        .status-option.cancelado {
+            border-left: 4px solid #dfe6e9;
+            color: #636e72;
+        }
+
+        .modal-footer {
+            padding: 15px 30px 25px;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .btn-cancel {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-cancel:hover {
+            background: #d0d0d0;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .filter-section {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-section input,
+        .filter-section select {
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 0.95em;
+        }
+
+        h2, h3 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .dashboard-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .tabs {
+                gap: 5px;
+            }
+
+            .tab-btn {
+                padding: 12px 15px;
+                font-size: 0.9em;
+            }
+
+            table {
+                font-size: 0.9em;
+            }
+
+            table th,
+            table td {
+                padding: 10px;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .filter-section {
+                flex-direction: column;
+            }
+
+            .filter-section input,
+            .filter-section select {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <img src="./images/logo.png.png" alt="Logo da Empresa" class="header-logo">
+            <div class="header-content">
+                <h1>📅 GMUD</h1>
+                <p>Calendário e Gestão de Manutenção de Equipamentos</p>
+            </div>
+        </header>
+
+        <div class="content">
+            <div class="tabs">
+                <button class="tab-btn active" onclick="showTab('dashboard')">📊 Dashboard</button>
+                <button class="tab-btn" onclick="showTab('calendario')">📆 Calendário</button>
+                <button class="tab-btn" onclick="showTab('lista')">📋 Manutenções</button>
+                <button class="tab-btn" onclick="showTab('nova')">➕ Agendar</button>
+            </div>
+
+            <!-- Dashboard Tab -->
+            <div id="dashboard" class="tab-content active">
+                <h2>📊 Dashboard - Resumo</h2>
+                <div class="dashboard-stats">
+                    <div class="stat-card">
+                        <h3>Total</h3>
+                        <div class="number" id="stat-total">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Agendadas</h3>
+                        <div class="number" id="stat-agendadas">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Em Progresso</h3>
+                        <div class="number" id="stat-progresso">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Concluídas</h3>
+                        <div class="number" id="stat-concluidas">0</div>
+                    </div>
+                </div>
+
+                <h3>Taxa de Conclusão</h3>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill">0%</div>
+                </div>
+
+                <h3>Últimas Manutenções</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Equipamento</th>
+                            <th>Data</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recent-list">
+                        <tr>
+                            <td colspan="3" class="empty-state">Carregando...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Calendário Tab -->
+            <div id="calendario" class="tab-content">
+                <h2>📆 Calendário de Manutenções</h2>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin: 20px 0; flex-wrap: wrap; gap: 20px;">
+                    <button onclick="previousMonth()" class="btn-secondary">← Anterior</button>
+                    <h3 id="month-title">Abril 2026</h3>
+                    <button onclick="nextMonth()" class="btn-secondary">Próximo →</button>
+                </div>
+                <div class="calendar" id="calendar">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+
+            <!-- Lista Tab -->
+            <div id="lista" class="tab-content">
+                <h2>📋 Todas as Manutenções</h2>
+                <div class="filter-section">
+                    <input type="text" id="filter-equipment" placeholder="🔍 Filtrar por equipamento..." style="flex: 1; min-width: 200px;">
+                    <select id="filter-status">
+                        <option value="">Todos os status</option>
+                        <option value="AGENDADO">Agendada</option>
+                        <option value="EM_PROGRESSO">Em Progresso</option>
+                        <option value="CONCLUIDO">Concluída</option>
+                        <option value="CANCELADO">Cancelada</option>
+                    </select>
+                    <button onclick="loadGMUDs()">🔄 Atualizar</button>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Data</th>
+                            <th>Equipamento</th>
+                            <th>Descrição</th>
+                            <th>Risco</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="gmuds-list">
+                        <tr>
+                            <td colspan="7" class="empty-state">Carregando...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Nova GMUD Tab -->
+            <div id="nova" class="tab-content">
+                <h2>➕ Agendar Nova Manutenção</h2>
+                <form id="form-gmud" style="max-width: 600px;">
+                    <div class="form-group">
+                        <label for="data">📅 Data da Manutenção *</label>
+                        <input type="date" id="data" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="equipamento">⚙️ Equipamento *</label>
+                        <input type="text" id="equipamento" placeholder="Ex: Compressor A" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="descricao">📝 Descrição da Manutenção *</label>
+                        <textarea id="descricao" placeholder="Ex: Revisão completa e limpeza interna..." required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="justificativa">💡 Justificativa *</label>
+                        <textarea id="justificativa" placeholder="Ex: Manutenção preventiva conforme cronograma..." required></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="risco">⚠️ Nível de Risco *</label>
+                            <select id="risco" required>
+                                <option value="">Selecione...</option>
+                                <option value="BAIXO">Baixo</option>
+                                <option value="MÉDIO">Médio</option>
+                                <option value="ALTO">Alto</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 10px;">
+                        <button type="submit">✅ Agendar GMUD</button>
+                        <button type="reset" class="btn-secondary">🔄 Limpar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <!-- Modal de Seleção de Status -->
+    <div id="statusModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📊 Novo status (127.0.0.1:8000)</h2>
+            </div>
+            <div class="modal-body">
+                <button class="status-option agendado" onclick="selectStatus('AGENDADO')">AGENDADO</button>
+                <button class="status-option em_progresso" onclick="selectStatus('EM_PROGRESSO')">EM_PROGRESSO</button>
+                <button class="status-option concluido" onclick="selectStatus('CONCLUIDO')">CONCLUIDO</button>
+                <button class="status-option cancelado" onclick="selectStatus('CANCELADO')">CANCELADO</button>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeStatusModal()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.origin + '/api/gmuds';
+        let gmuds = [];
+        let currentDate = new Date();
+
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', () => {
+            loadGMUDs();
+            loadDashboard();
+            renderCalendar();
+            
+            document.getElementById('form-gmud').addEventListener('submit', handleCreateGMUD);
+            document.getElementById('filter-equipment').addEventListener('input', filterGMUDs);
+            document.getElementById('filter-status').addEventListener('change', filterGMUDs);
+        });
+
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            
+            document.getElementById(tabName).classList.add('active');
+            
+            // Encontrar o botão correspondente e marcar como ativo
+            const buttons = document.querySelectorAll('.tab-btn');
+            buttons.forEach(btn => {
+                if (btn.textContent.includes('Dashboard') && tabName === 'dashboard') btn.classList.add('active');
+                if (btn.textContent.includes('Calendário') && tabName === 'calendario') btn.classList.add('active');
+                if (btn.textContent.includes('Manutenções') && tabName === 'lista') btn.classList.add('active');
+                if (btn.textContent.includes('Agendar') && tabName === 'nova') btn.classList.add('active');
+            });
+
+            if (tabName === 'dashboard') loadDashboard();
+            if (tabName === 'calendario') renderCalendar();
+            if (tabName === 'lista') loadGMUDs();
+        }
+
+        async function loadGMUDs() {
+            try {
+                const response = await fetch(API_BASE);
+                if (!response.ok) throw new Error('Erro ao carregar');
+                gmuds = await response.json();
+                filterGMUDs();
+                renderCalendar(); // Atualizar calendário
+            } catch (error) {
+                console.error('Erro:', error);
+                showToast('❌ Erro ao carregar manutenções', 'error');
+            }
+        }
+
+        function filterGMUDs() {
+            const equipment = document.getElementById('filter-equipment').value.toLowerCase();
+            const status = document.getElementById('filter-status').value;
+
+            const filtered = gmuds.filter(gmud => {
+                return gmud.equipamento.toLowerCase().includes(equipment) &&
+                       (!status || gmud.status === status);
+            });
+
+            renderGMUDsList(filtered);
+        }
+
+        function renderGMUDsList(list) {
+            const tbody = document.getElementById('gmuds-list');
+            
+            if (list.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="empty-state">Nenhuma manutenção encontrada</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = list.map(gmud => `
+                <tr>
+                    <td>#${gmud.id}</td>
+                    <td>${formatDate(gmud.data)}</td>
+                    <td><strong>${gmud.equipamento}</strong></td>
+                    <td>${(gmud.descricao || '-').substring(0, 30)}...</td>
+                    <td><span class="badge badge-${(gmud.risco || 'BAIXO').toLowerCase()}">${gmud.risco || 'BAIXO'}</span></td>
+                    <td><span class="badge badge-${gmud.status.toLowerCase()}">${getStatusText(gmud.status)}</span></td>
+                    <td>
+                        <button class="btn-small" onclick="downloadDocument(${gmud.id})">📄</button>
+                        <button class="btn-small" onclick="updateStatus(${gmud.id})">✏️</button>
+                        <button class="btn-small btn-danger" onclick="deleteGMUD(${gmud.id})">🗑️</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        async function loadDashboard() {
+            try {
+                const response = await fetch(API_BASE + '/dashboard/resumo');
+                if (!response.ok) throw new Error('Erro');
+                const data = await response.json();
+
+                document.getElementById('stat-total').textContent = data.total;
+                document.getElementById('stat-agendadas').textContent = data.agendadas;
+                document.getElementById('stat-progresso').textContent = data.em_progresso;
+                document.getElementById('stat-concluidas').textContent = data.concluidas;
+
+                const percent = Math.round(data.taxa_conclusao);
+                const fill = document.getElementById('progress-fill');
+                fill.style.width = percent + '%';
+                fill.textContent = percent + '%';
+
+                const recent = gmuds.slice(-5).reverse();
+                const recentList = document.getElementById('recent-list');
+                
+                if (recent.length === 0) {
+                    recentList.innerHTML = '<tr><td colspan="3" class="empty-state">Nenhuma manutenção registrada</td></tr>';
+                    return;
+                }
+
+                recentList.innerHTML = recent.map(gmud => `
+                    <tr>
+                        <td>${gmud.equipamento}</td>
+                        <td>${formatDate(gmud.data)}</td>
+                        <td><span class="badge badge-${gmud.status.toLowerCase()}">${getStatusText(gmud.status)}</span></td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                console.error('Erro:', error);
+            }
+        }
+
+        async function handleCreateGMUD(e) {
+            e.preventDefault();
+
+            const data = {
+                data: document.getElementById('data').value,
+                equipamento: document.getElementById('equipamento').value,
+                descricao: document.getElementById('descricao').value,
+                justificativa: document.getElementById('justificativa').value,
+                risco: document.getElementById('risco').value
+            };
+
+            try {
+                const response = await fetch(API_BASE + '/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Erro ao criar GMUD');
+                }
+
+                showToast('✅ GMUD criada com sucesso!');
+                document.getElementById('form-gmud').reset();
+                loadGMUDs();
+                loadDashboard();
+                setTimeout(() => showTab('lista'), 1500);
+            } catch (error) {
+                showToast('❌ ' + error.message, 'error');
+            }
+        }
+
+        async function deleteGMUD(id) {
+            if (!confirm('Tem certeza que deseja deletar esta manutenção?')) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/${id}`, { method: 'DELETE' });
+                if (response.ok) {
+                    showToast('🗑️ GMUD deletada');
+                    loadGMUDs();
+                    loadDashboard();
+                }
+            } catch (error) {
+                showToast('❌ Erro ao deletar', 'error');
+            }
+        }
+
+        let currentGMUDId = null;
+
+        async function updateStatus(id) {
+            currentGMUDId = id;
+            document.getElementById('statusModal').classList.add('show');
+        }
+
+        function closeStatusModal() {
+            document.getElementById('statusModal').classList.remove('show');
+            currentGMUDId = null;
+        }
+
+        async function selectStatus(status) {
+            if (!currentGMUDId) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/${currentGMUDId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: status })
+                });
+
+                if (response.ok) {
+                    showToast('✅ Status atualizado para ' + getStatusText(status));
+                    loadGMUDs();
+                    loadDashboard();
+                    closeStatusModal();
+                } else {
+                    throw new Error('Erro na resposta do servidor');
+                }
+            } catch (error) {
+                showToast('❌ Erro ao atualizar: ' + error.message, 'error');
+            }
+        }
+
+        // Fechar modal ao clicar fora
+        document.addEventListener('click', function(event) {
+            const modal = document.getElementById('statusModal');
+            if (event.target === modal) {
+                closeStatusModal();
+            }
+        });
+
+        function renderCalendar() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+
+            const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+                              'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+            document.getElementById('month-title').textContent = `${monthNames[month]} ${year}`;
+
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            const cal = document.getElementById('calendar');
+            cal.innerHTML = '';
+
+            const dayHeaders = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab'];
+            dayHeaders.forEach(day => {
+                const header = document.createElement('div');
+                header.className = 'calendar-day-header';
+                header.textContent = day;
+                cal.appendChild(header);
+            });
+
+            // Dias vazios antes do mês
+            for (let i = 0; i < firstDay; i++) {
+                const day = document.createElement('div');
+                day.className = 'calendar-day other-month';
+                cal.appendChild(day);
+            }
+
+            // Dias do mês
+            for (let i = 1; i <= daysInMonth; i++) {
+                const day = document.createElement('div');
+                day.className = 'calendar-day';
+                
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+                
+                // Procurar GMUDs neste dia
+                const gmudsNoDia = gmuds.filter(g => g.data === dateStr);
+                
+                if (gmudsNoDia.length > 0) {
+                    const gmud = gmudsNoDia[0]; // Pegar primeira GMUD do dia
+                    
+                    // Determinar cor baseada no status
+                    let statusClass = '';
+                    let statusIcon = '';
+                    
+                    if (gmud.status === 'CONCLUIDO') {
+                        statusClass = 'status-finalizado';
+                        statusIcon = '✓';
+                    } else if (gmud.status === 'EM_PROGRESSO') {
+                        // Verificar se está atrasado (mais de 5 horas)
+                        const dataManuencao = new Date(gmud.data + 'T08:00:00'); // Assumir que começa às 8h
+                        const agora = new Date();
+                        const horasDecorridas = (agora - dataManuencao) / (1000 * 60 * 60);
+                        
+                        if (horasDecorridas > 5) {
+                            statusClass = 'status-atrasado';
+                            statusIcon = '⚠';
+                        } else {
+                            statusClass = 'status-progresso';
+                            statusIcon = '⚙';
+                        }
+                    } else if (gmud.status === 'AGENDADO') {
+                        statusClass = 'status-pendente';
+                        statusIcon = '📅';
+                    }
+                    
+                    day.classList.add(statusClass);
+                    day.innerHTML = `
+                        <div style="text-align: center;">
+                            <div style="font-size: 1.2em;">${i}</div>
+                            <div class="calendar-gmud-info">${statusIcon} ${gmud.equipamento.substring(0, 8)}</div>
+                        </div>
+                    `;
+                    day.title = `${gmud.equipamento}\n${gmud.status}`;
+                } else {
+                    day.textContent = i;
+                }
+
+                cal.appendChild(day);
+            }
+        }
+
+        function previousMonth() {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            renderCalendar();
+        }
+
+        function nextMonth() {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            renderCalendar();
+        }
+
+        function formatDate(dateStr) {
+            const date = new Date(dateStr + 'T00:00:00');
+            return date.toLocaleDateString('pt-BR');
+        }
+
+        function getStatusText(status) {
+            const map = {
+                'AGENDADO': 'Agendada',
+                'EM_PROGRESSO': 'Em Progresso',
+                'CONCLUIDO': 'Concluída',
+                'CANCELADO': 'Cancelada'
+            };
+            return map[status] || status;
+        }
+
+        async function downloadDocument(id) {
+            try {
+                showToast('⏳ Gerando documento...');
+                
+                const response = await fetch(`${API_BASE}/${id}/documento`);
+                
+                if (!response.ok) {
+                    throw new Error('Erro ao gerar documento');
+                }
+
+                // Obter o nome do arquivo do header
+                const contentDisposition = response.headers.get('content-disposition');
+                let filename = `GMUD_${id}.docx`;
+                
+                if (contentDisposition && contentDisposition.includes('filename=')) {
+                    filename = contentDisposition.split('filename=')[1].replace(/"/g, '').split(';')[0];
+                }
+
+                // Converter resposta para blob
+                const blob = await response.blob();
+
+                // Criar link para download
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                
+                // Adicionar ao DOM e clicar
+                document.body.appendChild(a);
+                a.click();
+                
+                // Limpar
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                
+                showToast('✅ Documento baixado com sucesso!');
+            } catch (error) {
+                console.error('Erro:', error);
+                showToast('❌ Erro ao baixar documento: ' + error.message, 'error');
+            }
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast show' + (type === 'error' ? ' error' : '');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+    </script>
+</body>
+</html>
