@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  gmud-api:
+    build: .
+    container_name: gmud-app
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=sqlite:///./data/gmuds.db
+      - DEBUG=False
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
+  # Opcional: PostgreSQL para produção
+  # postgres:
+  #   image: postgres:15-alpine
+  #   container_name: gmud-db
+  #   environment:
+  #     POSTGRES_DB: gmuds
+  #     POSTGRES_USER: gmud_user
+  #     POSTGRES_PASSWORD: secure_password_change_me
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   restart: unless-stopped
+
+# volumes:
+#   postgres_data:
